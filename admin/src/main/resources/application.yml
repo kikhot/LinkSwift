@@ -13,3 +13,8 @@ spring:
       idle-timeout: 300000
       maximum-pool-size: 5
       minimum-idle: 5
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: toor
