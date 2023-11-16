@@ -26,6 +26,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
 
         GroupDO groupDO = GroupDO.builder()
                 .gid(gid)
+                .sortOrder(0)
                 .name(groupName)
                 //TODO 通过网关添加用户名
 //                .username()
