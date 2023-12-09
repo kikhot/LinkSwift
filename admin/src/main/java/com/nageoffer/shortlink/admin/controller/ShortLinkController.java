@@ -2,7 +2,7 @@ package com.nageoffer.shortlink.admin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.nageoffer.shortlink.admin.common.convention.result.Result;
-import com.nageoffer.shortlink.admin.remote.dto.ShorLinkRemoteService;
+import com.nageoffer.shortlink.admin.remote.ShortLinkRemoteService;
 import com.nageoffer.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import com.nageoffer.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
 import com.nageoffer.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
@@ -19,7 +19,7 @@ public class ShortLinkController {
      * TODO 后续会重构为 SpringCloud Feign 调用
      */
 
-    ShorLinkRemoteService shorLinkRemoteService = new ShorLinkRemoteService() {
+    ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {
     };
 
     /**
@@ -27,7 +27,7 @@ public class ShortLinkController {
      */
     @PostMapping("/api/short-link/admin/v1/create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
-        return shorLinkRemoteService.createShortLink(requestParam);
+        return shortLinkRemoteService.createShortLink(requestParam);
     }
 
     /**
@@ -35,6 +35,6 @@ public class ShortLinkController {
      */
     @GetMapping("/api/short-link/admin/v1/page")
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
-        return shorLinkRemoteService.pageShortLink(requestParam);
+        return shortLinkRemoteService.pageShortLink(requestParam);
     }
 }
