@@ -38,10 +38,9 @@ public interface ShortLinkRemoteService {
      * 修改短链接
      *
      * @param requestParam 分组短链接总量请求参数
-     * @return 查询分组短链接总量响应
      */
     default void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
-        HttpRequest.put("http://127.0.0.1:8001/api/short-link/v1/update").form(JSON.toJSONString(requestParam)).execute().body();
+        HttpRequest.put("http://127.0.0.1:8001/api/short-link/v1/update").body(JSON.toJSONString(requestParam)).execute();
     }
 
     /**
