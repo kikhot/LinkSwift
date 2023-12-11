@@ -28,6 +28,7 @@
         <hutool-all.version>5.8.20</hutool-all.version>
         <redission.version>3.21.3</redission.version>
         <guava.version>30.0-jre</guava.version>
+        <jsoup.version>1.15.3</jsoup.version>
     </properties>
 
     <dependencies>
