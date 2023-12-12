@@ -316,7 +316,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .date(new Date())
                     .build();
             linkAccessStatsMapper.shortLinkStats(linkAccessStatsDO);
-            //添加地区地址表
+            //添加读取访问地址表
             Map<String, Object> localeParamMap = new HashMap<>();
             localeParamMap.put("key", statsLocaleamapKey);
             localeParamMap.put("ip", remoteAddr);
