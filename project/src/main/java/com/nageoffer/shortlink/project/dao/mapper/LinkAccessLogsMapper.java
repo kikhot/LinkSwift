@@ -136,4 +136,7 @@ public interface LinkAccessLogsMapper extends BaseMapper<LinkAccessLogsDO> {
             "ORDER BY " +
             "    count DESC " +
             "LIMIT 5;")
-    List<HashMap<String, Object>> listTopIpByGroup(@Param("param") ShortLinkGroupStatsReqDTO requestParam);}
+    List<HashMap<String, Object>> listTopIpByGroup(@Param("param") ShortLinkGroupStatsReqDTO requestParam);
+
+    List<Map<String, Object>> selectGroupUvTypeByUsers(String gid, String startDate, String endDate, List<String> userAccessLogsList);
+}
