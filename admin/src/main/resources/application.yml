@@ -12,3 +12,7 @@ spring:
       host: localhost
       port: 6379
       password: toor
+
+short-link:
+  group:
+    max-num: 20
