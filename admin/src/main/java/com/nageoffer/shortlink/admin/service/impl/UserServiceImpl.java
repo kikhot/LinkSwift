@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.nageoffer.shortlink.admin.common.convention.exception.ClientException;
+import com.nageoffer.shortlink.admin.common.convention.exception.ServiceException;
+import com.nageoffer.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.nageoffer.shortlink.admin.dao.entity.UserDo;
 import com.nageoffer.shortlink.admin.dao.mapper.UserMapper;
 import com.nageoffer.shortlink.admin.dto.req.UserLoginReqDTO;
@@ -67,7 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
     @Override
     public void register(UserRegisterReqDTO requestParam) {
         if (hasUsername(requestParam.getUsername())) {
-            throw new ClientException(USER_NAME_EXIST);
+            throw new ServiceException(UserErrorCodeEnum.USER_NULL);
         }
         RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + requestParam.getUsername());
         try {
