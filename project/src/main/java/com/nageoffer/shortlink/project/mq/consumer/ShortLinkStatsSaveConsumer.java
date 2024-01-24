@@ -9,19 +9,21 @@ import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.nageoffer.shortlink.project.common.constant.LinkRocketMQConstant;
+import com.nageoffer.shortlink.project.common.convention.exception.ServiceException;
 import com.nageoffer.shortlink.project.dao.entity.*;
 import com.nageoffer.shortlink.project.dao.mapper.*;
 import com.nageoffer.shortlink.project.dto.biz.ShortLinkStatsRecordDTO;
+import com.nageoffer.shortlink.project.mq.idempotent.MessageQueueIdempotentHandler;
 import com.nageoffer.shortlink.project.mq.producer.DelayShortLinkStatsProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -43,7 +45,7 @@ import static com.nageoffer.shortlink.project.common.constant.ShortLinkConstant.
         topic = LinkRocketMQConstant.SHORT_LINK_STATS_STREAM_TOPIC_KEY,
         consumerGroup = LinkRocketMQConstant.SHORT_LINK_STATS_STREAM_GROUP_KEY
 )
-public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, String>> {
+public class ShortLinkStatsSaveConsumer implements RocketMQListener<MessageExt> {
 
     private final ShortLinkMapper shortLinkMapper;
     private final ShortLinkGotoMapper shortLinkGotoMapper;
@@ -57,20 +59,43 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, 
     private final LinkNetworkStatsMapper linkNetworkStatsMapper;
     private final LinkStatsTodayMapper linkStatsTodayMapper;
     private final DelayShortLinkStatsProducer delayShortLinkStatsProducer;
-    private final StringRedisTemplate stringRedisTemplate;
+    private final MessageQueueIdempotentHandler messageQueueIdempotentHandler;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
 
 
     @Override
-    public void onMessage(Map<String, String> producerMap) {
-        String fullShortUrl = producerMap.get("fullShortUrl");
-        if (StrUtil.isNotBlank(fullShortUrl)) {
-            String gid = producerMap.get("gid");
-            ShortLinkStatsRecordDTO statsRecord = JSON.parseObject(producerMap.get("statsRecord"), ShortLinkStatsRecordDTO.class);
-            actualSaveShortLinkStats(fullShortUrl, gid, statsRecord);
+    public void onMessage(MessageExt message) {
+        String messageId = message.getMsgId();
+        // 在MQ中增加幂等操作
+        if (!messageQueueIdempotentHandler.isMessageProcessed(messageId)) {
+            // 判断当前消息是否执行完成
+            if (messageQueueIdempotentHandler.isAccomplish(messageId)) {
+                return;
+            }
+            throw new ServiceException("消息未完成流程，需要消息队列重试");
         }
+        try {
+            byte[] body = message.getBody();
+            String bodyStr = new String(body);
+            Map map = JSONObject.parseObject(bodyStr, Map.class);
+            Map<String, String> producerMap = new HashMap<>();
+            for (Object key : map.keySet()) {
+                producerMap.put(String.valueOf(key), String.valueOf(map.get(key)));
+            }
+            String fullShortUrl = producerMap.get("fullShortUrl");
+            if (StrUtil.isNotBlank(fullShortUrl)) {
+                String gid = producerMap.get("gid");
+                ShortLinkStatsRecordDTO statsRecord = JSON.parseObject(producerMap.get("statsRecord"), ShortLinkStatsRecordDTO.class);
+                actualSaveShortLinkStats(fullShortUrl, gid, statsRecord);
+            }
+        } catch (Throwable ex) {
+            messageQueueIdempotentHandler.delMessageProcessed(messageId);
+            log.error("记录短链接监控消费异常");
+            throw new ServiceException("记录短链接监控消费异常");
+        }
+        messageQueueIdempotentHandler.setAccomplish(messageId);
     }
 
     public void actualSaveShortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDTO statsRecord) {
