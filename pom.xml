@@ -30,6 +30,7 @@
         <guava.version>30.0-jre</guava.version>
         <jsoup.version>1.15.3</jsoup.version>
         <easyexcel.version>3.1.3</easyexcel.version>
+        <rocketmq.version>2.2.3</rocketmq.version>
     </properties>
 
     <dependencies>
@@ -112,6 +113,14 @@
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
             </dependency>
+
+            <!--rocketmq包-->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
