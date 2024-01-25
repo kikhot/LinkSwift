@@ -120,13 +120,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             // 已经误判的短链接如何处理
             // 第一种，短链接确实真实存在缓存
             // 第二种，短链接不一定存在缓存中（这个我觉得可能情况是数据库的数据没有全部同步到布隆过滤器导致的
-            LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
-                    .eq(ShortLinkDO::getFullShortUrl, fullShortUrl);
-            ShortLinkDO hasShortLink = baseMapper.selectOne(queryWrapper);
-            if (hasShortLink != null) {
-                log.warn("短链接:{} 重复入库", fullShortUrl);
-                throw new ServiceException("短链接生成重复");
-            }
+            log.warn("短链接:{} 重复入库", fullShortUrl);
+            throw new ServiceException(String.format("短链接: %s 生成重复", fullShortUrl));
         }
         stringRedisTemplate.opsForValue().set(
                 String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
@@ -483,7 +478,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 throw new ServiceException("短链接频繁生成，请稍后再试");
             }
             String originUrl = requestParam.getOriginUrl();
-            originUrl += System.currentTimeMillis();
+            originUrl += UUID.randomUUID().toString();
             shortUri = HashUtil.hashToBase62(originUrl);
             if (!shortUriCreateCachePenetrationBloomFilter.contains(createShortLinkDefaultDomain + "/" + shortUri)) {
                 break;
