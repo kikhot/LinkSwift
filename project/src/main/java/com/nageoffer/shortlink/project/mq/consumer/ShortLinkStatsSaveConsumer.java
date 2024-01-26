@@ -82,7 +82,7 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<MessageExt> 
             Map map = JSONObject.parseObject(bodyStr, Map.class);
             Map<String, String> producerMap = new HashMap<>();
             for (Object key : map.keySet()) {
-                producerMap.put(String.valueOf(key), String.valueOf(map.get(key)));
+                producerMap.put(String.valueOf(key), map.get(key) == null ? null : String.valueOf(map.get(key)));
             }
             String fullShortUrl = producerMap.get("fullShortUrl");
             if (StrUtil.isNotBlank(fullShortUrl)) {

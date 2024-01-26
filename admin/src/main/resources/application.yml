@@ -2,6 +2,8 @@ server:
   port: 8002
 
 spring:
+  application:
+    name: short-link-admin
   datasource:
     # ShardingSphere 对 Driver 自定义，实现分库分表等隐藏逻辑
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
@@ -12,6 +14,10 @@ spring:
       host: localhost
       port: 6379
       password: toor
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.100.130.147:8848
 
 short-link:
   group:
