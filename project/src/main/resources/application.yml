@@ -22,6 +22,7 @@ spring:
     nacos:
       discovery:
         server-addr: 47.100.130.147:8848
+#        server-addr: 127.0.0.1:8848
 
 mybatis-plus:
   global-config:
@@ -43,6 +44,7 @@ short-link:
 
 rocketmq:
   name-server: 47.100.130.147:9876 # 访问地址
+#  name-server: 127.0.0.1:9876 # 访问地址
   producer:
     group: short-link_stats-stream # 必须指定group
     send-message-timeout: 3000 # 消息发送超时时长，默认3s
