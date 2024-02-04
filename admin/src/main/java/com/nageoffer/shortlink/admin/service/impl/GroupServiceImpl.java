@@ -139,7 +139,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 //TODO 通过网关设置用户名
                 .eq(GroupDO::getUsername, Optional.ofNullable(username).orElse(UserContext.getUsername()));
         GroupDO hasGroupFlag = baseMapper.selectOne(queryWrapper);
-        return hasGroupFlag != null;
+        return hasGroupFlag == null;
     }
 
 }
